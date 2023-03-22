@@ -7,13 +7,16 @@ import "./styles.css";
 import { ApiClientProvider } from "./api";
 import { settingsStore } from "./settings";
 import { openaiStore } from "./api/openai";
+import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <Provider store={settingsStore}>
       <Provider store={openaiStore}>
         <ApiClientProvider>
-          <App />
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
         </ApiClientProvider>
       </Provider>
     </Provider>

@@ -1,6 +1,4 @@
 import { useCallback, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/tauri";
 import {
   isPermissionGranted,
   requestPermission,
@@ -9,31 +7,15 @@ import {
 import { useAtom } from "jotai/react";
 import { settingsAtom, settingsStore } from "./settings";
 import { openaiAtom, openaiStore } from "./api/openai";
-import { useForm } from "react-hook-form";
-import { useChatMutation } from "./api/hooks";
-import { Button } from "flowbite-react";
-import { TextInput } from "flowbite-react/lib/esm/components";
+import { Route, Routes } from "react-router-dom";
+import { Prompts } from "./tabs/prompt";
+import { Settings } from "./tabs/settings";
+import { Layout } from "./Layout";
+import { Home } from "./tabs/home";
 
 const hasNotificationPermissions = await isPermissionGranted();
 
 function App() {
-  const [responseData, setResponseData] = useState("");
-  const { mutateAsync: submitChat, isLoading } = useChatMutation({
-    onSuccess: (data) => {
-      console.log(data);
-      if (data.data.choices.length && data.data.choices[0].text) {
-        setResponseData(data.data.choices[0].text);
-      }
-    },
-  });
-  const { register, handleSubmit } = useForm<{ prompt: string }>();
-  const handleChatSubmit = useCallback(
-    handleSubmit((body) => {
-      console.log(body);
-      submitChat(body.prompt);
-    }),
-    [submitChat]
-  );
   const [name, setName] = useState("");
   const [canBeNotified, setCanBeNotified] = useState(
     hasNotificationPermissions
@@ -68,8 +50,12 @@ function App() {
   // }
 
   return (
-    <div className="bg-slate-50 h-full">
-      {/* {canBeNotified ? (
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/prompts" element={<Prompts />} />
+        <Route path="/settings" element={<Settings />} />
+        {/* {canBeNotified ? (
         <div>
           You can be notified!
           <button onClick={handleSendNotification}>HERE</button>
@@ -82,21 +68,8 @@ function App() {
           Request Permission
         </button>
       )} */}
-
-      <div className="flex flex-col h-full">
-        <div className="flex-1 bg-slate-200 p-4 m-2 rounded">
-          {isLoading ? <div>Loading</div> : <div>{responseData}</div>}
-        </div>
-        <form className="flex gap-2 px-2 py-4" onSubmit={handleChatSubmit}>
-          <TextInput
-            className="flex-1"
-            {...register("prompt")}
-            placeholder="Enter a prompt"
-          />
-          <Button type="submit">Submit</Button>
-        </form>
-      </div>
-    </div>
+      </Route>
+    </Routes>
   );
 }
 
