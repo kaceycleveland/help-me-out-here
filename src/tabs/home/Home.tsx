@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { Button, TextInput } from "flowbite-react";
 import { useChatMutation } from "../../api/hooks";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
+import { PageAnimateLayout } from "../components/PageAnimateLayout";
 
 export const Home = () => {
   const [responseData, setResponseData] = useState("");
@@ -22,18 +24,20 @@ export const Home = () => {
     [submitChat]
   );
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 bg-slate-200 p-4 m-2 rounded">
-        {isLoading ? <div>Loading</div> : <div>{responseData}</div>}
+    <PageAnimateLayout>
+      <div className="flex flex-col h-full">
+        <div className="flex-1 bg-slate-200 p-4 m-2 rounded">
+          {isLoading ? <div>Loading</div> : <div>{responseData}</div>}
+        </div>
+        <form className="flex gap-2 px-2 py-4" onSubmit={handleChatSubmit}>
+          <TextInput
+            className="flex-1"
+            {...register("prompt")}
+            placeholder="Enter a prompt"
+          />
+          <Button type="submit">Submit</Button>
+        </form>
       </div>
-      <form className="flex gap-2 px-2 py-4" onSubmit={handleChatSubmit}>
-        <TextInput
-          className="flex-1"
-          {...register("prompt")}
-          placeholder="Enter a prompt"
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </div>
+    </PageAnimateLayout>
   );
 };

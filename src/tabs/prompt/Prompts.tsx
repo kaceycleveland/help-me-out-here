@@ -1,3 +1,5 @@
+import { PageAnimateLayout } from "../components/PageAnimateLayout";
+
 export const Prompts = () => {
-  return <div>Prompts</div>;
+  return <PageAnimateLayout>Prompts</PageAnimateLayout>;
 };

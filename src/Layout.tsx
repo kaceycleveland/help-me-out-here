@@ -1,5 +1,6 @@
 import { Button } from "flowbite-react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 
 interface NavButtonProps {
   title: string;
@@ -24,8 +25,10 @@ export const Layout = () => {
           </Button>
         ))}
       </Button.Group>
-      <div className="bg-slate-300 flex-1 p-2">
-        <Outlet />
+      <div className="bg-slate-300 flex-1 p-2 relative">
+        <AnimatePresence>
+          <Outlet />
+        </AnimatePresence>
       </div>
     </div>
   );
