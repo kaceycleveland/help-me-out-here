@@ -24,8 +24,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.7",
     "react-router": "^6.9.0",
-    "react-router-dom": "^6.9.0",
-    "tauri-plugin-sql-api": "https://github.com/tauri-apps/tauri-plugin-sql"
+    "react-router-dom": "^6.9.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.2",

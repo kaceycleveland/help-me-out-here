@@ -11,7 +11,7 @@ interface NavButtonProps {
 
 const buttons: NavButtonProps[] = [
   { title: "Home", path: "/" },
-  { title: "Prompts", path: "/prompts" },
+  { title: "Conversations", path: "/conversations" },
   { title: "Settings", path: "/settings" },
 ];
 
