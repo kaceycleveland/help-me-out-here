@@ -3,6 +3,7 @@ import { Prompts } from "./tabs/prompt";
 import { Settings } from "./tabs/settings";
 import { Layout } from "./Layout";
 import { Home } from "./tabs/home";
+
 function App() {
   const location = useLocation();
 

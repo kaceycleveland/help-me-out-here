@@ -25,8 +25,8 @@ export const Layout = () => {
           </Button>
         ))}
       </Button.Group>
-      <div className="bg-slate-300 flex-1 p-2 relative">
-        <AnimatePresence>
+      <div className="bg-slate-300 flex-1 min-h-0 p-2 relative">
+        <AnimatePresence mode="wait">
           <Outlet />
         </AnimatePresence>
       </div>

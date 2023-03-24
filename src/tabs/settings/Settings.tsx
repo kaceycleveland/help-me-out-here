@@ -79,7 +79,6 @@ const SettingsInput = ({
   const toggleIsHidden = useCallback(() => {
     setIsHidden((hidden) => !hidden);
   }, []);
-  console.log(field, label);
   return (
     <SettingsInputContainer>
       <div className="flex gap-2">
