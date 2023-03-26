@@ -19,6 +19,7 @@ export const ConversationView = () => {
     <PageAnimateLayout className="h-full">
       <ConversationForm
         title={conversationData.title}
+        created={conversationData.created}
         initMessages={conversationData.messages.map(
           ({ conversationId, id, ...rest }) => rest
         )}

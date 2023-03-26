@@ -1,9 +1,7 @@
 import { useState, useCallback } from "react";
-import { Button, TextInput } from "flowbite-react";
+import { Button, Spinner, TextInput } from "flowbite-react";
 import { useChatMutation } from "../../../api/hooks";
 import { useForm } from "react-hook-form";
-import { db } from "../../../api";
-import { PageAnimateLayout } from "../PageAnimateLayout";
 import {
   ChatCompletionRequestMessage,
   ChatCompletionRequestMessageRoleEnum,
@@ -11,32 +9,47 @@ import {
 import { SystemMessage, UserMessage } from "./messages";
 import { CreateConversationModal } from "../CreateConversationModal";
 import { UpdateConversationModal } from "../UpdateConversationModal";
+import { MessageEntry } from "../../../api";
+import { MessageLayout } from "./messages/MessageLayout";
+import { formatDate } from "../../../utils/dateUtils";
 
 interface ConversationFormProps {
-  initMessages?: ChatCompletionRequestMessage[];
+  initMessages?: MessageEntry[];
   title?: string;
+  created?: Date;
   conversationId?: number;
 }
 
 export const ConversationForm = ({
   initMessages,
   title,
+  created,
   conversationId,
 }: ConversationFormProps) => {
   const [showModal, setShowModal] = useState(false);
   const openModal = useCallback(() => setShowModal(true), []);
   const closeModal = useCallback(() => setShowModal(false), []);
-  const [responseData, setResponseData] = useState<
-    ChatCompletionRequestMessage[]
-  >(initMessages ?? []);
-  console.log(responseData);
+  const [responseData, setResponseData] = useState<MessageEntry[]>(
+    initMessages ?? []
+  );
+
   const { mutateAsync: submitChat, isLoading } = useChatMutation({
     onSuccess: (data, entry) => {
       console.log("entry", entry);
+      const previousMessages = entry.map((message) => ({
+        ...message,
+        created: new Date(),
+        updated: new Date(),
+      }));
       if (data.data.choices.length && data.data.choices[0].message) {
         setResponseData([
-          ...entry,
-          { role: "system", content: data.data.choices[0].message.content },
+          ...previousMessages,
+          {
+            role: "system",
+            content: data.data.choices[0].message.content,
+            created: new Date(),
+            updated: new Date(),
+          },
         ]);
       }
     },
@@ -45,26 +58,32 @@ export const ConversationForm = ({
   const handleChatSubmit = useCallback(
     handleSubmit((body) => {
       console.log(body);
-      setResponseData((prevResponseData) => {
-        const newResponseData = [
-          ...prevResponseData,
-          {
-            role: ChatCompletionRequestMessageRoleEnum.User,
-            content: body.prompt,
-          },
-        ];
-        reset();
-        submitChat(newResponseData);
-        return newResponseData;
-      });
+      const newResponseData = [
+        ...responseData,
+        {
+          role: ChatCompletionRequestMessageRoleEnum.User,
+          content: body.prompt,
+          created: new Date(),
+          updated: new Date(),
+        },
+      ];
+      setResponseData(newResponseData);
+      reset();
+      submitChat(newResponseData);
+      return newResponseData;
     }),
-    [handleSubmit, reset, submitChat]
+    [responseData, handleSubmit, reset, submitChat]
   );
 
   return (
     <div className="flex flex-col h-full">
-      {title && <div className="text-lg">{title}</div>}
-      <div className="min-h-0 grow bg-slate-200 p-4 m-2 rounded overflow-auto">
+      {title && created && (
+        <div className="flex flex-col gap-1 font-semibold bg-slate-50 py-2 px-4 border my-2">
+          <div className="text-xl">{title}</div>
+          <div className="text-sm">{formatDate(created, "PP")}</div>
+        </div>
+      )}
+      <div className="min-h-0 grow p-4 overflow-auto flex flex-col gap-2">
         {responseData.map((message, idx) => {
           if (message.role === ChatCompletionRequestMessageRoleEnum.User)
             return <UserMessage key={idx} {...message} />;
@@ -72,13 +91,15 @@ export const ConversationForm = ({
             return <SystemMessage key={idx} {...message} />;
         })}
         {isLoading && (
-          <SystemMessage
-            role={ChatCompletionRequestMessageRoleEnum.System}
-            content="Loading..."
-          />
+          <MessageLayout role="system">
+            <Spinner />
+          </MessageLayout>
         )}
       </div>
-      <form className="flex gap-2 px-2 py-4" onSubmit={handleChatSubmit}>
+      <form
+        className="flex gap-2 px-2 py-4 border rounded bg-slate-50"
+        onSubmit={handleChatSubmit}
+      >
         <TextInput
           className="flex-1"
           {...register("prompt")}

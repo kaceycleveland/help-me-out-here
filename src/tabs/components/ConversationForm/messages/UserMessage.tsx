@@ -1,16 +1,10 @@
-import { ChatCompletionRequestMessage } from "openai";
+import { MessageEntry } from "../../../../api";
 import { MessageLayout } from "./MessageLayout";
 
-export const UserMessage = ({
-  role,
-  content,
-}: ChatCompletionRequestMessage) => {
+export const UserMessage = ({ content, ...rest }: MessageEntry) => {
   return (
-    <MessageLayout>
-      <div>{role}</div>
-      <div className="m-1 p-2 bg-cyan-50 rounded">
-        <div className="text-cyan-700">{content}</div>
-      </div>
+    <MessageLayout {...rest} className="bg-gray-200">
+      <div className="">{content}</div>
     </MessageLayout>
   );
 };

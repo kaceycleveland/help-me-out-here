@@ -1,6 +1,7 @@
 import { Table } from "flowbite-react";
 import { Link, useLoaderData } from "react-router-dom";
 import { Conversation, db } from "../../api";
+import { formatDate } from "../../utils/dateUtils";
 import { PageAnimateLayout } from "../components/PageAnimateLayout";
 
 export const conversationLoader = () => {
@@ -16,6 +17,8 @@ export const Conversations = () => {
       <Table>
         <Table.Head>
           <Table.HeadCell>Conversation Name</Table.HeadCell>
+          <Table.HeadCell>Created</Table.HeadCell>
+          <Table.HeadCell>Updated</Table.HeadCell>
           <Table.HeadCell>
             <span className="sr-only">Edit</span>
           </Table.HeadCell>
@@ -27,6 +30,8 @@ export const Conversations = () => {
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {conversation.title}
                 </Table.Cell>
+                <Table.Cell>{formatDate(conversation.created)}</Table.Cell>
+                <Table.Cell>{formatDate(conversation.updated)}</Table.Cell>
                 <Table.Cell>
                   <Link
                     to={`/conversations/${conversation.id}`}

@@ -4,12 +4,20 @@ import { ChatCompletionRequestMessage } from "openai";
 export interface Conversation {
   id?: number;
   title: string;
+  created: Date;
+  updated: Date;
 }
 
 interface Message extends ChatCompletionRequestMessage {
   id?: number;
+  created: Date;
+  updated: Date;
   conversationId: number;
 }
+
+export type MessageEntry = Omit<Message, "conversationId"> & {
+  conversationId?: number;
+};
 
 export class ConvoDB extends Dexie {
   conversations!: Table<Conversation, number>;
@@ -20,6 +28,27 @@ export class ConvoDB extends Dexie {
     this.version(1).stores({
       conversations: "++id",
       messages: "++id, conversationId",
+    });
+
+    this.version(2).upgrade((tx) => {
+      return Promise.all([
+        tx
+          .table("conversations")
+          .toCollection()
+          .modify((conversation) => {
+            const currentDate = new Date();
+            conversation.created = currentDate;
+            conversation.updated = currentDate;
+          }),
+        tx
+          .table("messages")
+          .toCollection()
+          .modify((message) => {
+            const currentDate = new Date();
+            message.created = currentDate;
+            message.updated = currentDate;
+          }),
+      ]);
     });
   }
 
@@ -52,16 +81,24 @@ export class ConvoDB extends Dexie {
     );
   }
 
-  createConversation(title: string, messages: ChatCompletionRequestMessage[]) {
+  createConversation(title: string, messages: MessageEntry[]) {
     return this.transaction(
       "rw",
       this.messages,
       this.conversations,
       async () => {
-        const conversationId = await this.conversations.add({ title });
+        const currentTime = new Date();
+        const conversationId = await this.conversations.add({
+          title,
+          created: currentTime,
+          updated: currentTime,
+        });
         await this.messages.bulkAdd(
           messages.map((message) => {
-            return { ...message, conversationId };
+            return {
+              ...message,
+              conversationId,
+            };
           })
         );
         return conversationId;

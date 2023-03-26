@@ -3,9 +3,10 @@ import { Button, Modal, ModalProps, TextInput } from "flowbite-react";
 import { ChatCompletionRequestMessage } from "openai";
 import { useForm } from "react-hook-form";
 import { useCreateConversationMutation } from "../../api/hooks";
+import { MessageEntry } from "../../api";
 
 interface CreateConversationModalProps extends ModalProps {
-  messages: ChatCompletionRequestMessage[];
+  messages: MessageEntry[];
 }
 
 export const CreateConversationModal = ({
