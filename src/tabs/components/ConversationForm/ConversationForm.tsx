@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { Button, Spinner, TextInput } from "flowbite-react";
+import { Spinner } from "@components/Spinner";
+import { Button } from "@components/Button";
 import { useChatMutation } from "../../../api/hooks";
 import { useForm } from "react-hook-form";
 import {
@@ -12,6 +13,7 @@ import { UpdateConversationModal } from "../UpdateConversationModal";
 import { MessageEntry } from "../../../api";
 import { MessageLayout } from "./messages/MessageLayout";
 import { formatDate } from "../../../utils/dateUtils";
+import { Input } from "@components/Input";
 
 interface ConversationFormProps {
   initMessages?: MessageEntry[];
@@ -83,31 +85,33 @@ export const ConversationForm = ({
           <div className="text-sm">{formatDate(created, "PP")}</div>
         </div>
       )}
-      <div className="min-h-0 grow p-4 overflow-auto flex flex-col gap-2">
-        {responseData.map((message, idx) => {
-          if (message.role === ChatCompletionRequestMessageRoleEnum.User)
-            return <UserMessage key={idx} {...message} />;
-          if (message.role === ChatCompletionRequestMessageRoleEnum.System)
-            return <SystemMessage key={idx} {...message} />;
-        })}
-        {isLoading && (
-          <MessageLayout role="system">
-            <Spinner />
-          </MessageLayout>
-        )}
+      <div className="min-h-0 grow p-4 overflow-auto flex flex-col-reverse gap-2">
+        <div>
+          {responseData.map((message, idx) => {
+            if (message.role === ChatCompletionRequestMessageRoleEnum.User)
+              return <UserMessage key={idx} {...message} />;
+            if (message.role === ChatCompletionRequestMessageRoleEnum.System)
+              return <SystemMessage key={idx} {...message} />;
+          })}
+          {isLoading && (
+            <MessageLayout role="system">
+              <Spinner />
+            </MessageLayout>
+          )}
+        </div>
       </div>
       <form
         className="flex gap-2 px-2 py-4 border rounded bg-slate-50"
         onSubmit={handleChatSubmit}
       >
-        <TextInput
+        <Input
           className="flex-1"
           {...register("prompt")}
           placeholder="Enter a prompt"
           disabled={isLoading}
         />
         <Button type="submit" disabled={isLoading}>
-          Submit
+          Send
         </Button>
         <Button onClick={openModal}>
           {conversationId ? "Update" : "Create"}

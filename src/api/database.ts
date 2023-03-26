@@ -115,7 +115,10 @@ export class ConvoDB extends Dexie {
       this.messages,
       this.conversations,
       async () => {
-        await this.conversations.update(conversationId, { title: args[0] });
+        await this.conversations.update(conversationId, {
+          title: args[0],
+          updated: new Date(),
+        });
         await this.messages.where({ conversationId }).delete();
         await this.messages.bulkAdd(
           args[1].map((message) => {

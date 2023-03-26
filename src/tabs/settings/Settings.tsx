@@ -1,5 +1,6 @@
 import { ReactNode, useState, useCallback } from "react";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button } from "@components/Button";
+import { Input } from "@components/Input";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import {
   Settings as SettingsType,
@@ -82,17 +83,15 @@ const SettingsInput = ({
   return (
     <SettingsInputContainer>
       <div className="flex gap-2">
-        <Label className="pl-1" htmlFor={field} value={label} />{" "}
+        <label className="pl-1" htmlFor={field}>
+          {label}{" "}
+        </label>
         <EyeIcon
           className="w-4 cursor-pointer hover:text-slate-500"
           onClick={toggleIsHidden}
         />
       </div>
-      <TextInput
-        type={isHidden ? "password" : undefined}
-        shadow
-        {...register(field)}
-      />
+      <Input type={isHidden ? "password" : undefined} {...register(field)} />
     </SettingsInputContainer>
   );
 };

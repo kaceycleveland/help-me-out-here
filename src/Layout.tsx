@@ -1,13 +1,12 @@
-import { Button, Navbar } from "flowbite-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import {
   MinusIcon,
   Square2StackIcon,
-  WindowIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { appWindow } from "@tauri-apps/api/window";
+import { Tab } from "@headlessui/react";
 
 interface NavButtonProps {
   title: string;
@@ -51,20 +50,19 @@ export const Layout = () => {
         </div>
       </div>
       <div className="border flex-1 flex flex-col min-h-0 bg-sky-50 p-2">
-        <Navbar menuOpen border fluid rounded>
-          <Navbar.Toggle />
-          <Navbar.Collapse>
+        <Tab.Group>
+          <Tab.List className="flex gap-2">
             {buttons.map(({ title, path }, idx) => (
-              <Navbar.Link
-                color="gray"
+              <Tab
                 key={idx}
+                className="bg-white rounded border px-4 py-2"
                 onClick={() => navigate(path)}
               >
                 {title}
-              </Navbar.Link>
+              </Tab>
             ))}
-          </Navbar.Collapse>
-        </Navbar>
+          </Tab.List>
+        </Tab.Group>
 
         <div className="flex-1 min-h-0 relative">
           <AnimatePresence mode="wait">

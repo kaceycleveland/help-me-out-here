@@ -1,6 +1,5 @@
-import { Table } from "flowbite-react";
 import { Link, useLoaderData } from "react-router-dom";
-import { Conversation, db } from "../../api";
+import { db } from "../../api";
 import { formatDate } from "../../utils/dateUtils";
 import { PageAnimateLayout } from "../components/PageAnimateLayout";
 
@@ -14,37 +13,37 @@ export const Conversations = () => {
   >;
   return (
     <PageAnimateLayout>
-      <Table>
-        <Table.Head>
-          <Table.HeadCell>Conversation Name</Table.HeadCell>
-          <Table.HeadCell>Created</Table.HeadCell>
-          <Table.HeadCell>Updated</Table.HeadCell>
-          <Table.HeadCell>
+      <table className="table-auto mt-2 bg-slate-50 border-collapse border w-full text-left font-light">
+        <thead className="border-b font-medium">
+          <th className="px-2 py-2">Conversation Name</th>
+          <th className="px-2 py-2">Created</th>
+          <th className="px-2 py-2">Updated</th>
+          <th className="px-2 py-2">
             <span className="sr-only">Edit</span>
-          </Table.HeadCell>
-        </Table.Head>
-        <Table.Body className="divide-y">
+          </th>
+        </thead>
+        <tbody>
           {conversations.map((conversation) => {
             return (
-              <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+              <tr className="bg-white">
+                <td className="whitespace-nowrap font-medium text-gray-900 p-2">
                   {conversation.title}
-                </Table.Cell>
-                <Table.Cell>{formatDate(conversation.created)}</Table.Cell>
-                <Table.Cell>{formatDate(conversation.updated)}</Table.Cell>
-                <Table.Cell>
+                </td>
+                <td className="p-2">{formatDate(conversation.created)}</td>
+                <td className="p-2">{formatDate(conversation.updated)}</td>
+                <td className="p-2">
                   <Link
                     to={`/conversations/${conversation.id}`}
-                    className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                    className="font-medium text-blue-600 hover:underline"
                   >
                     Edit
                   </Link>
-                </Table.Cell>
-              </Table.Row>
+                </td>
+              </tr>
             );
           })}
-        </Table.Body>
-      </Table>
+        </tbody>
+      </table>
     </PageAnimateLayout>
   );
 };
