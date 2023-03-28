@@ -1,11 +1,20 @@
 import Dexie, { Table } from "dexie";
-import { ChatCompletionRequestMessage } from "openai";
+import {
+  ChatCompletionRequestMessage,
+  CreateChatCompletionRequest,
+} from "openai";
+import { settingsAtom, settingsStore } from "../settings";
+import { queryClient } from "./client";
+import { ConversationKey } from "./hooks/keys";
+
+export type ModelBody = Omit<CreateChatCompletionRequest, "messages">;
 
 export interface Conversation {
   id?: number;
   title: string;
   created: Date;
   updated: Date;
+  modelBody: ModelBody;
 }
 
 interface Message extends ChatCompletionRequestMessage {
@@ -13,11 +22,16 @@ interface Message extends ChatCompletionRequestMessage {
   created: Date;
   updated: Date;
   conversationId: number;
+  modelBody: ModelBody;
 }
 
 export type MessageEntry = Omit<Message, "conversationId"> & {
   conversationId?: number;
 };
+
+export type ConversationData = Awaited<ReturnType<ConvoDB["getConversation"]>>;
+
+export type ConversationCreateData = Parameters<ConvoDB["createConversation"]>;
 
 export class ConvoDB extends Dexie {
   conversations!: Table<Conversation, number>;
@@ -68,8 +82,8 @@ export class ConvoDB extends Dexie {
     );
   }
 
-  deleteConversation(conversationId: number) {
-    return this.transaction(
+  async deleteConversation(conversationId: number) {
+    const deletedConversationId = await this.transaction(
       "rw",
       this.messages,
       this.conversations,
@@ -79,10 +93,17 @@ export class ConvoDB extends Dexie {
         return conversationId;
       }
     );
+
+    await queryClient.invalidateQueries(ConversationKey(deletedConversationId));
+    return deletedConversationId;
   }
 
-  createConversation(title: string, messages: MessageEntry[]) {
-    return this.transaction(
+  async createConversation(
+    title: string,
+    messages: MessageEntry[],
+    modelBody?: ModelBody
+  ) {
+    const createdConversationId = await this.transaction(
       "rw",
       this.messages,
       this.conversations,
@@ -92,6 +113,8 @@ export class ConvoDB extends Dexie {
           title,
           created: currentTime,
           updated: currentTime,
+          modelBody:
+            modelBody ?? settingsStore.get(settingsAtom).defaultModelBody,
         });
         await this.messages.bulkAdd(
           messages.map((message) => {
@@ -104,30 +127,50 @@ export class ConvoDB extends Dexie {
         return conversationId;
       }
     );
+
+    await queryClient.invalidateQueries(ConversationKey(createdConversationId));
+
+    return createdConversationId;
   }
 
-  updateConversation(
+  async updateConversation(
     conversationId: number,
-    ...args: Parameters<typeof this.createConversation>
+    ...args: Partial<Parameters<typeof this.createConversation>>
   ) {
-    return this.transaction(
+    const updatedConversationId = await this.transaction(
       "rw",
       this.messages,
       this.conversations,
       async () => {
-        await this.conversations.update(conversationId, {
-          title: args[0],
-          updated: new Date(),
-        });
-        await this.messages.where({ conversationId }).delete();
-        await this.messages.bulkAdd(
-          args[1].map((message) => {
-            return { ...message, conversationId };
-          })
-        );
+        if (args[0] || args[2]) {
+          await this.conversations.update(conversationId, {
+            updated: new Date(),
+          });
+
+          args[0] &&
+            (await this.conversations.update(conversationId, {
+              title: args[0],
+            }));
+
+          args[2] &&
+            (await this.conversations.update(conversationId, {
+              modelBody: args[2],
+            }));
+        }
+
+        if (args[1]) {
+          await this.messages.where({ conversationId }).delete();
+          await this.messages.bulkAdd(
+            args[1].map((message) => {
+              return { ...message, conversationId };
+            })
+          );
+        }
         return conversationId;
       }
     );
+    await queryClient.invalidateQueries(ConversationKey(updatedConversationId));
+    return updatedConversationId;
   }
 }
 

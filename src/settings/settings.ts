@@ -5,17 +5,28 @@ import {
   BaseDirectory,
   readTextFile,
 } from "@tauri-apps/api/fs";
+import { ModelBody } from "../api";
 
 export interface Settings {
   openAiApiKey: string;
   openAiOrg: string;
+  defaultModelBody: ModelBody;
 }
 
 const APP_FILE = "app.conf";
 export const settingsStore = createStore();
 
 const initializeSettings = async (
-  settings = { openAiApiKey: "", openAiOrg: "" },
+  settings: Settings = {
+    openAiApiKey: "",
+    openAiOrg: "",
+    defaultModelBody: {
+      model: "gpt3-3.5-turbo",
+      max_tokens: 100,
+      presence_penalty: 1,
+      frequency_penalty: 1,
+    },
+  },
   write = false
 ): Promise<Settings> => {
   const settingsExist = await exists(APP_FILE, {

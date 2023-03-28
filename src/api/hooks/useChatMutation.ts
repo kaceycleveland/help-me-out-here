@@ -18,17 +18,12 @@ export const useChatMutation = (
   >({
     mutationFn: (messageEntries) => {
       const messages = messageEntries.map(
-        ({ created, updated, conversationId, ...rest }) => rest
+        ({ id, created, updated, conversationId, modelBody, ...rest }) => rest
       );
       console.log("calling chat mutation...");
       return openaiStore.get(openaiAtom).createChatCompletion({
-        model: "gpt-3.5-turbo",
         messages,
-        temperature: 0.7,
-        max_tokens: 64,
-        top_p: 1.0,
-        frequency_penalty: 0.0,
-        presence_penalty: 0.0,
+        ...messageEntries[messageEntries.length - 1].modelBody,
       });
     },
     ...options,

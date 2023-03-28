@@ -1,10 +1,21 @@
 import { LoaderFunctionArgs, Params, useLoaderData } from "react-router-dom";
-import { db } from "../../api";
-import { ConversationForm } from "../components/ConversationForm";
+import { db, queryClient } from "../../api";
+import { ConversationKey } from "../../api/hooks/keys";
+import { useGetConversation } from "../../api/hooks/useGetConversation";
+import { ConversationFormEdit } from "../components/ConversationForm";
 import { PageAnimateLayout } from "../components/PageAnimateLayout";
 
-export const conversationViewLoader = ({ params }: LoaderFunctionArgs) => {
-  if (params.id) return db.getConversation(parseInt(params.id));
+export const conversationViewLoader = async ({
+  params,
+}: LoaderFunctionArgs) => {
+  if (params.id) {
+    const conversation = await db.getConversation(parseInt(params.id));
+    queryClient.setQueryData(
+      ConversationKey(conversation.id),
+      () => conversation
+    );
+    return conversation;
+  }
 };
 
 export const ConversationView = () => {
@@ -12,19 +23,16 @@ export const ConversationView = () => {
     ReturnType<typeof conversationViewLoader>
   >;
 
-  if (!conversationData) {
+  const { data } = useGetConversation(conversationData?.id, {
+    initialData: conversationData,
+  });
+
+  if (!data) {
     return <div>No Data</div>;
   }
   return (
     <PageAnimateLayout className="h-full">
-      <ConversationForm
-        title={conversationData.title}
-        created={conversationData.created}
-        initMessages={conversationData.messages.map(
-          ({ conversationId, id, ...rest }) => rest
-        )}
-        conversationId={conversationData.id}
-      />
+      <ConversationFormEdit conversationId={data.id} />
     </PageAnimateLayout>
   );
 };

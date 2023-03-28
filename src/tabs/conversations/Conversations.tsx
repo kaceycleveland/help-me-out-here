@@ -3,7 +3,7 @@ import { db } from "../../api";
 import { formatDate } from "../../utils/dateUtils";
 import { PageAnimateLayout } from "../components/PageAnimateLayout";
 
-export const conversationLoader = () => {
+export const conversationLoader = async () => {
   return db.conversations.toCollection().toArray();
 };
 
@@ -15,17 +15,19 @@ export const Conversations = () => {
     <PageAnimateLayout>
       <table className="table-auto mt-2 bg-slate-50 border-collapse border w-full text-left font-light">
         <thead className="border-b font-medium">
-          <th className="px-2 py-2">Conversation Name</th>
-          <th className="px-2 py-2">Created</th>
-          <th className="px-2 py-2">Updated</th>
-          <th className="px-2 py-2">
-            <span className="sr-only">Edit</span>
-          </th>
+          <tr>
+            <th className="px-2 py-2">Conversation Name</th>
+            <th className="px-2 py-2">Created</th>
+            <th className="px-2 py-2">Updated</th>
+            <th className="px-2 py-2">
+              <span className="sr-only">Edit</span>
+            </th>
+          </tr>
         </thead>
         <tbody>
-          {conversations.map((conversation) => {
+          {conversations.map((conversation, idx) => {
             return (
-              <tr className="bg-white">
+              <tr key={idx} className="bg-white">
                 <td className="whitespace-nowrap font-medium text-gray-900 p-2">
                   {conversation.title}
                 </td>

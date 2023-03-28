@@ -1,25 +1,33 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { ChatCompletionRequestMessage } from "openai";
-import { db, MessageEntry } from "../database";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { ConversationCreateData, db, MessageEntry } from "../database";
 import { PromiseExtended } from "dexie";
-
-interface CreateConversationBody {
-  title: string;
-  messages: MessageEntry[];
-}
+import { ConversationKey } from "./keys";
 
 export const useCreateConversationMutation = (
   options?: UseMutationOptions<
     PromiseExtended<number>,
     unknown,
-    CreateConversationBody
+    ConversationCreateData
   >
 ) => {
-  return useMutation(
-    ["title"],
-    ({ title, messages }) => {
-      return db.createConversation(title, messages).then();
+  const queryClient = useQueryClient();
+  let passedOptions = { ...options };
+  const passedSuccess = passedOptions.onSuccess;
+  passedOptions.onSuccess = (...args) => {
+    passedSuccess?.(...args);
+    args[0].then((conversationId) => {
+      queryClient.invalidateQueries(ConversationKey(conversationId));
+    });
+  };
+  return useMutation({
+    mutationKey: ["conversation", "post"],
+    mutationFn: (args) => {
+      return db.createConversation(...args).then();
     },
-    options
-  );
+    ...passedOptions,
+  });
 };
