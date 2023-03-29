@@ -1,4 +1,4 @@
-import { ReactNode, useState, useCallback } from "react";
+import { ReactNode, useState, useCallback, useMemo } from "react";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import { db, MessageEntry, ModelBody } from "../../../api";
@@ -8,6 +8,8 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { PromptOptionsSettingsModal } from "../PromptOptionsSettingsModal";
 import { CreateConversationModal } from "../CreateConversationModal";
+import { useAtom, useSetAtom } from "jotai";
+import { conversationIdAtom, clipboardStore } from "../../../clipboard";
 
 interface ConversationFormHeaderProps {
   conversationId?: number;
@@ -24,6 +26,20 @@ export const ConversationFormHeader = ({
   setModelSettings,
   children,
 }: ConversationFormHeaderProps) => {
+  const [clipboardConversationId, setClipboardConversationId] = useAtom(
+    conversationIdAtom,
+    {
+      store: clipboardStore,
+    }
+  );
+  const isClipboardConversationId = useMemo(
+    () => clipboardConversationId === conversationId,
+    [conversationId, clipboardConversationId]
+  );
+  const toggleClipboardConversationId = useCallback(() => {
+    if (isClipboardConversationId) setClipboardConversationId(undefined);
+    else setClipboardConversationId(conversationId);
+  }, [conversationId, isClipboardConversationId]);
   const [editingTitle, setEditingTitle] = useState(false);
   const { data } = useGetConversation(conversationId);
   console.log(data);
@@ -48,6 +64,10 @@ export const ConversationFormHeader = ({
     }),
     [reset, conversationId]
   );
+
+  const setToClipboard = useCallback(async () => {
+    setClipboardConversationId(conversationId);
+  }, [conversationId, setClipboardConversationId]);
 
   return (
     <div className="flex flex-col gap-1 font-semibold bg-slate-50 py-2 px-4 border my-2">
@@ -95,10 +115,23 @@ export const ConversationFormHeader = ({
             </div>
           )
         )}
-        <PromptOptionsSettingsModal
-          modelSettings={modelSettings}
-          setModelSettings={setModelSettings}
-        />
+        <div className="flex gap-2">
+          <Button
+            onClick={
+              isClipboardConversationId
+                ? toggleClipboardConversationId
+                : setToClipboard
+            }
+          >
+            {isClipboardConversationId
+              ? "Unset from clipboard"
+              : "Set clipboard"}
+          </Button>
+          <PromptOptionsSettingsModal
+            modelSettings={modelSettings}
+            setModelSettings={setModelSettings}
+          />
+        </div>
       </div>
       {data?.created && (
         <div className="text-sm">{formatDate(data?.created, "PP")}</div>

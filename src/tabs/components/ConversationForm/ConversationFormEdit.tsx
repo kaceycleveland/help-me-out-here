@@ -4,14 +4,15 @@ import { Button } from "@components/Button";
 import { useChatMutation } from "../../../api/hooks";
 import { useForm } from "react-hook-form";
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
-import { SystemMessage, UserMessage } from "./messages";
+import { ClipboardMessage, SystemMessage, UserMessage } from "./messages";
 import { db, MessageEntry, ModelBody } from "../../../api";
 import { MessageLayout } from "./messages/MessageLayout";
 import { Input } from "@components/Input";
 import { ConversationFormHeader } from "./ConversationFormHeader";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { settingsAtom, settingsStore } from "../../../settings";
 import { useGetConversation } from "../../../api/hooks/useGetConversation";
+import { clipboardStore, conversationResultAtom } from "../../../clipboard";
 
 interface ConversationFormProps {
   conversationId?: number;
@@ -25,6 +26,13 @@ export const ConversationFormEdit = ({
   const { defaultModelBody } = useAtomValue(settingsAtom, {
     store: settingsStore,
   });
+
+  const [conversationResult, setConversationResult] = useAtom(
+    conversationResultAtom,
+    { store: clipboardStore }
+  );
+
+  console.log("CONVERSATIONRESULT UPDATE", conversationResult);
 
   const foundModelBody = useMemo(() => {
     if (conversationState.isSuccess) {
@@ -110,7 +118,7 @@ export const ConversationFormEdit = ({
         modelSettings={modelBody}
         setModelSettings={setModelSettings}
       />
-      <div className="min-h-0 grow p-4 overflow-auto flex flex-col-reverse gap-2">
+      <div className="relative min-h-0 grow p-4 overflow-auto flex flex-col-reverse gap-2">
         <div>
           {conversationState.data?.messages.map((message, idx) => {
             if (message.role === ChatCompletionRequestMessageRoleEnum.User)
@@ -125,6 +133,7 @@ export const ConversationFormEdit = ({
               <Spinner />
             </MessageLayout>
           )}
+          {conversationResult && <ClipboardMessage {...conversationResult} />}
         </div>
       </div>
       <form

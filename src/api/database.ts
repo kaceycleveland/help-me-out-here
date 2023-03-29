@@ -64,6 +64,12 @@ export class ConvoDB extends Dexie {
           }),
       ]);
     });
+
+    this.version(3).stores({
+      conversations: "++id",
+      messages: "++id, conversationId",
+      shortcuts: "++id, conversationId",
+    });
   }
 
   getConversation(conversationId: number) {

@@ -70,7 +70,7 @@ export const ConversationFormCreate = () => {
       submitChat(newResponseData);
       return newResponseData;
     }),
-    [handleSubmit, reset, submitChat, modelBody]
+    [responseData, handleSubmit, reset, submitChat, modelBody]
   );
 
   const isLoading = Boolean(isChatLoading);

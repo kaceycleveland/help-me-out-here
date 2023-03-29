@@ -1,5 +1,6 @@
 import { Link, useLoaderData } from "react-router-dom";
 import { db } from "../../api";
+import { useGetConversations } from "../../api/hooks";
 import { formatDate } from "../../utils/dateUtils";
 import { PageAnimateLayout } from "../components/PageAnimateLayout";
 
@@ -11,6 +12,8 @@ export const Conversations = () => {
   const conversations = useLoaderData() as Awaited<
     ReturnType<typeof conversationLoader>
   >;
+
+  const conversationState = useGetConversations({ initialData: conversations });
   return (
     <PageAnimateLayout>
       <table className="table-auto mt-2 bg-slate-50 border-collapse border w-full text-left font-light">
@@ -25,7 +28,7 @@ export const Conversations = () => {
           </tr>
         </thead>
         <tbody>
-          {conversations.map((conversation, idx) => {
+          {conversationState.data?.map((conversation, idx) => {
             return (
               <tr key={idx} className="bg-white">
                 <td className="whitespace-nowrap font-medium text-gray-900 p-2">

@@ -3,21 +3,21 @@ import clsx from "clsx";
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 import { FormLabel, FormLabelProps } from "./FormLabel";
 
-export interface InputProps
+export interface SelectProps
   extends DetailedHTMLProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
+    InputHTMLAttributes<HTMLSelectElement>,
+    HTMLSelectElement
   > {
   variant?: "sm" | "md" | "lg";
   labelProps?: FormLabelProps;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, variant = "md", labelProps, ...rest }, ref) => {
     return (
       <div className="w-full">
         {labelProps && <FormLabel {...labelProps} />}
-        <input
+        <select
           ref={ref}
           className={clsx(
             className,
