@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Spinner } from "@components/Spinner";
 import { Button } from "@components/Button";
 import { useChatMutation } from "../../../api/hooks";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
 import { ClipboardMessage, SystemMessage, UserMessage } from "./messages";
 import { db, MessageEntry, ModelBody } from "../../../api";
@@ -13,6 +13,8 @@ import { useAtom, useAtomValue } from "jotai";
 import { settingsAtom, settingsStore } from "../../../settings";
 import { useGetConversation } from "../../../api/hooks/useGetConversation";
 import { clipboardStore, conversationResultAtom } from "../../../clipboard";
+import { AssistantMessage } from "./messages/AssistantMessage";
+import { TextArea } from "@components/TextArea";
 
 interface ConversationFormProps {
   conversationId?: number;
@@ -84,23 +86,29 @@ export const ConversationFormEdit = ({
       },
     }
   );
-  const { register, handleSubmit, reset } = useForm<{ prompt: string }>();
+  const { register, control, handleSubmit, reset } = useForm<{
+    prompt: string;
+    isSystem?: boolean;
+  }>();
   const handleChatSubmit = useCallback(
-    handleSubmit((body) => {
-      console.log(body);
+    handleSubmit(({ prompt, isSystem }) => {
+      console.log("SUBMIT", prompt, isSystem);
+      if (!prompt) return;
       if (conversationState.isSuccess) {
         const newResponseData = [
           ...conversationState.data.messages,
           {
-            role: ChatCompletionRequestMessageRoleEnum.User,
-            content: body.prompt,
+            role: isSystem
+              ? ChatCompletionRequestMessageRoleEnum.System
+              : ChatCompletionRequestMessageRoleEnum.User,
+            content: prompt,
             created: new Date(),
             updated: new Date(),
             modelBody,
           },
         ];
-        reset();
-        submitChat(newResponseData);
+        reset({ isSystem });
+        // submitChat(newResponseData);
         return newResponseData;
       }
     }),
@@ -126,7 +134,7 @@ export const ConversationFormEdit = ({
             if (message.role === ChatCompletionRequestMessageRoleEnum.System)
               return <SystemMessage key={idx} {...message} />;
             if (message.role === ChatCompletionRequestMessageRoleEnum.Assistant)
-              return <SystemMessage key={idx} {...message} />;
+              return <AssistantMessage key={idx} {...message} />;
           })}
           {isLoading && (
             <MessageLayout role="system">
@@ -140,11 +148,20 @@ export const ConversationFormEdit = ({
         className="flex gap-2 px-2 py-4 border rounded bg-slate-50"
         onSubmit={handleChatSubmit}
       >
-        <Input
+        <TextArea
           className="flex-1"
           {...register("prompt")}
           placeholder="Enter a prompt"
           disabled={isLoading}
+        />
+        <Controller
+          name="isSystem"
+          control={control}
+          render={({ field }) => {
+            const { value, ...rest } = field;
+            const val = value?.toString();
+            return <input type="checkbox" value={val} {...rest} />;
+          }}
         />
         <Button type="submit" disabled={isLoading}>
           Send

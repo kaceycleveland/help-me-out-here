@@ -1,7 +1,6 @@
-import { ReactNode } from "react";
 import { MessageLayout } from "./MessageLayout";
 import { MessageEntry } from "../../../../api";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import { Markdown } from "@components/Markdown";
 
 interface ClipboardMessageProps extends Omit<MessageEntry, "content"> {
   content: string;
@@ -18,7 +17,7 @@ export const ClipboardMessage = ({
     <div className="sticky bottom-0 bg-white border rounded mt-4 drop-shadow-lg">
       <MessageLayout role="Clipboard" {...rest} className=" bg-slate-200">
         <div className="overflow-auto">
-          <ReactMarkdown children={content} />
+          <Markdown children={content} />
         </div>
       </MessageLayout>
     </div>

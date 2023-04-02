@@ -2,13 +2,16 @@ import { MessageLayout } from "./MessageLayout";
 import { MessageEntry } from "../../../../api";
 import { Markdown } from "@components/Markdown";
 
-interface SystemMessageProps extends Omit<MessageEntry, "content"> {
+interface AssistantMessageProps extends Omit<MessageEntry, "content"> {
   content: string;
 }
 
-export const SystemMessage = ({ content, ...rest }: SystemMessageProps) => {
+export const AssistantMessage = ({
+  content,
+  ...rest
+}: AssistantMessageProps) => {
   return (
-    <MessageLayout {...rest} className=" bg-slate-200 whitespace-pre-wrap">
+    <MessageLayout {...rest} className=" bg-blue-50 whitespace-pre-wrap">
       <Markdown children={content} />
     </MessageLayout>
   );
